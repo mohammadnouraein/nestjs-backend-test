@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as UUIDv4 } from 'uuid';
 import { eachDayOfInterval } from 'date-fns';
-import { Repository } from 'typeorm';
+import { Repository, DeleteResult } from 'typeorm';
 import { Job } from './job.entity';
 import { Shift } from '../shift/shift.entity';
 
@@ -11,7 +11,7 @@ export class JobService {
   constructor(
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
-  ) {}
+  ) { }
 
   async createJob(uuid: string, date1: Date, date2: Date): Promise<Job> {
     date1.setUTCHours(8);
@@ -36,6 +36,21 @@ export class JobService {
     });
 
     return this.jobRepository.save(job);
+  }
+
+  async cancelJob(id: string): Promise<DeleteResult> {
+    const selectedJob = await this.jobRepository.findOne(id);
+    if (selectedJob) {
+      try {
+        return this.jobRepository.delete(selectedJob);
+      } catch (e) {
+        // TODO: Log error here
+        throw new HttpException(`Could not cancel the job with id:${id}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+    } else {
+      throw new HttpException(`Could not find the job with id:${id}`, HttpStatus.NOT_FOUND);
+    }
   }
 
   public async getJobs(): Promise<Job[]> {
