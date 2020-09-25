@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Delete, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { v4 as UUIDv4 } from 'uuid';
 import { JobService } from './job.service';
 import { ResponseDto } from '../../utils/ResponseDto';
@@ -17,8 +17,22 @@ export class JobController {
     @Body(new ValidationPipe<JobRequest>())
     dto: JobRequest,
   ): Promise<ResponseDto<JobRequestResponse>> {
-    const job = await this.jobService.createJob(UUIDv4(), dto.start, dto.end, dto.startTime, dto.endTime);
-    return new ResponseDto<JobRequestResponse>(new JobRequestResponse(job.id));
+    const today = new Date();
+    let errors = [];
+    if (dto.start < today || dto.start >= dto.end) {
+      errors.push('The start date cannot be in the past and the end date should be after the start date');
+    }
+    if (dto.endTime - dto.startTime > 8 || dto.endTime - dto.startTime < 2) {
+      errors.push('shifts can only be at most 8 hours long and minimum 2 hours');
+    }
+    if (errors.length) {
+      const errMessage = errors.map((err, ind) => ind + '.' + err).join(',');
+      throw new HttpException(`validation error :${errMessage}`, HttpStatus.BAD_REQUEST);
+    } else {
+      const job = await this.jobService.createJob(UUIDv4(), dto.start, dto.end, dto.startTime, dto.endTime);
+      return new ResponseDto<JobRequestResponse>(new JobRequestResponse(job.id));
+
+    }
   }
 
   @Delete(':id')
