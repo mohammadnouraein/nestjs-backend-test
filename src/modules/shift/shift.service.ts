@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeleteResult } from 'typeorm';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { Shift } from './shift.entity';
-
+import { v4 as UUIDv4 } from 'uuid';
 @Injectable()
 export class ShiftService {
 
@@ -23,7 +23,26 @@ export class ShiftService {
     const selectedShifts = await this.repository.find({ talentId });
     if (selectedShifts.length) {
       try {
-        return this.repository.delete({ talentId });
+        return this.repository.delete({ talentId }).then(deleteRes => {
+          if (deleteRes) {
+            let day = new Date();
+            day.setDate(new Date().getDate() + 1);
+
+            const startTime = new Date(day);
+            startTime.setUTCHours(8);
+            const endTime = new Date(day);
+            endTime.setUTCHours(17);
+            const shift = new Shift();
+            shift.id = UUIDv4();
+            //shift.job = job;
+            shift.startTime = startTime;
+            shift.endTime = endTime;
+
+            this.repository.save(shift);
+          }
+
+          return deleteRes;
+        });
       } catch (e) {
         // TODO: Log error here
         throw new HttpException(`Could not cancel the shifts for talent with talent id:${talentId}`, HttpStatus.INTERNAL_SERVER_ERROR);
