@@ -5,9 +5,10 @@ import { ShiftModule } from '../shift/shift.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Job } from './job.entity';
 import { ShiftService } from '../shift/shift.service';
+import { Shift } from '../shift/shift.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Job]), ShiftModule],
+  imports: [TypeOrmModule.forFeature([Job, Shift]), ShiftModule],
   controllers: [JobController],
   providers: [JobService, ShiftService],
   exports: [JobService],
