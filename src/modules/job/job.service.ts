@@ -13,9 +13,9 @@ export class JobService {
     private readonly jobRepository: Repository<Job>,
   ) { }
 
-  async createJob(uuid: string, date1: Date, date2: Date): Promise<Job> {
-    date1.setUTCHours(8);
-    date2.setUTCHours(17);
+  async createJob(uuid: string, date1: Date, date2: Date, startTime: number=8,endTime:number=17): Promise<Job> {
+    date1.setUTCHours(startTime);
+    date2.setUTCHours(endTime);
     const job = new Job();
     job.id = uuid;
     job.companyId = UUIDv4();
@@ -23,15 +23,15 @@ export class JobService {
     job.endTime = date2;
 
     job.shifts = eachDayOfInterval({ start: date1, end: date2 }).map(day => {
-      const startTime = new Date(day);
-      startTime.setUTCHours(8);
-      const endTime = new Date(day);
-      endTime.setUTCHours(17);
+      const startDateTime = new Date(day);
+      startDateTime.setUTCHours(startTime);
+      const endDateTime = new Date(day);
+      endDateTime.setUTCHours(endTime);
       const shift = new Shift();
       shift.id = UUIDv4();
       shift.job = job;
-      shift.startTime = startTime;
-      shift.endTime = endTime;
+      shift.startTime = startDateTime;
+      shift.endTime = endDateTime;
       return shift;
     });
 

@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsDate, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsDate, IsUUID, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsNull } from 'typeorm';
 
 export class JobRequest {
   @IsNotEmpty()
@@ -15,4 +16,12 @@ export class JobRequest {
   @IsDate()
   @IsNotEmpty()
   end: Date;
+
+  @Type(() => Number)
+  @IsNumber()
+  startTime: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  endTime: number;
 }
