@@ -5,6 +5,7 @@ import { Shift } from './shift.entity';
 
 @Injectable()
 export class ShiftService {
+
   constructor(
     @InjectRepository(Shift)
     private readonly repository: Repository<Shift>,
@@ -16,6 +17,18 @@ export class ShiftService {
         jobId: uuid,
       },
     });
+  }
+
+  async cancelShiftsByTalentId(talentId: string): Promise<DeleteResult> {
+    const selectedShifts = await this.repository.find({ talentId });
+    if (selectedShifts.length) {
+      try {
+        return this.repository.delete({ talentId });
+      } catch (e) {
+        // TODO: Log error here
+        throw new HttpException(`Could not cancel the shifts for talent with talent id:${talentId}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
 
   async cancelShiftByJobId(jobId: string): Promise<DeleteResult> {

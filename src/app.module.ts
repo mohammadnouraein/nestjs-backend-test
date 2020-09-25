@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JobModule } from './modules/job/job.module';
 import { ShiftModule } from './modules/shift/shift.module';
+import { TalentModule } from './modules/talent/talent.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 
@@ -14,6 +15,7 @@ import { join } from 'path';
     }),
     JobModule,
     ShiftModule,
+    TalentModule
   ],
 })
 export class AppModule {}
