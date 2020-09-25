@@ -8,7 +8,7 @@ export class ShiftService {
   constructor(
     @InjectRepository(Shift)
     private readonly repository: Repository<Shift>,
-  ) {}
+  ) { }
 
   public async getShifts(uuid: string): Promise<Shift[]> {
     return this.repository.find({
@@ -19,10 +19,10 @@ export class ShiftService {
   }
 
   async cancelShiftByJobId(jobId: string): Promise<DeleteResult> {
-    const selectedShifts = await this.repository.find({jobId});
+    const selectedShifts = await this.repository.find({ jobId });
     if (selectedShifts.length) {
       try {
-        return this.repository.delete({jobId});
+        return this.repository.delete({ jobId });
       } catch (e) {
         // TODO: Log error here
         throw new HttpException(`Could not cancel the shifts for job with job id:${jobId}`, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -30,6 +30,20 @@ export class ShiftService {
     } else {
       // Uncomment below line of code if having shift in job is mandatory
       // throw new HttpException(`Couldn't find any shift for job :${jobId}`, HttpStatus.NOT_FOUND);
+    }
+  }
+
+  async cancelShift(id: string): Promise<DeleteResult> {
+    const selectedShift = await this.repository.findOne(id);
+    if (selectedShift) {
+      try {
+        return this.repository.delete({ id });
+      } catch (e) {
+        // TODO: Log error here
+        throw new HttpException(`Could not cancel the shift with id:${id}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    } else {
+      throw new HttpException(`Couldn't find any shift with id :${id}`, HttpStatus.NOT_FOUND);
     }
   }
 

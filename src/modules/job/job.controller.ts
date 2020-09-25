@@ -6,6 +6,7 @@ import { ValidationPipe } from '../ValidationPipe';
 import { JobRequest } from './dto/JobRequest';
 import { JobRequestResponse } from './dto/JobRequestResponse';
 import { ShiftService } from '../shift/shift.service';
+import { CancelResponse } from '../../utils/CancelResponse';
 
 @Controller('job')
 export class JobController {
@@ -23,11 +24,11 @@ export class JobController {
   @Delete(':id')
   async cancelJob(
     @Param('id') id: string
-  ): Promise<ResponseDto<JobRequestResponse>> {
+  ): Promise<ResponseDto<CancelResponse>> {
     const cancelationResult = await this.jobService.cancelJob(id);
     if (cancelationResult.affected) {
       await this.shiftService.cancelShiftByJobId(id);
     }
-    return new ResponseDto<JobRequestResponse>(new JobRequestResponse(cancelationResult.affected ? id : ''));
+    return new ResponseDto<CancelResponse>(new CancelResponse(id, !!cancelationResult.affected));
   }
 }

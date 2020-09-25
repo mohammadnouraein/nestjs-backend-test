@@ -42,7 +42,7 @@ export class JobService {
     const selectedJob = await this.jobRepository.findOne(id);
     if (selectedJob) {
       try {
-        return this.jobRepository.delete(selectedJob);
+        return this.jobRepository.delete({ id });
       } catch (e) {
         // TODO: Log error here
         throw new HttpException(`Could not cancel the job with id:${id}`, HttpStatus.INTERNAL_SERVER_ERROR);

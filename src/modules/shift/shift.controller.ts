@@ -7,6 +7,7 @@ import {
   Patch,
   HttpCode,
   ParseUUIDPipe,
+  Delete,
 } from '@nestjs/common';
 import { ResponseDto } from '../../utils/ResponseDto';
 import { GetShiftsResponse } from './dto/GetShiftsResponse';
@@ -14,10 +15,11 @@ import { GetShiftResponse } from './dto/GetShiftResponse';
 import { ShiftService } from './shift.service';
 import { ValidationPipe } from '../ValidationPipe';
 import { BookTalentRequest } from './dto/BookTalentRequest';
+import { CancelResponse } from '../../utils/CancelResponse';
 
 @Controller('shift')
 export class ShiftController {
-  constructor(private readonly shiftService: ShiftService) {}
+  constructor(private readonly shiftService: ShiftService) { }
 
   @Get(':jobId')
   async getShifts(
@@ -37,6 +39,17 @@ export class ShiftController {
         }),
       ),
     );
+  }
+
+  @Delete(':id')
+  async cancelShift(
+    @Param('id') id: string
+  ): Promise<ResponseDto<CancelResponse>> {
+    const cancelationResult = await this.shiftService.cancelShift(id);
+    if (cancelationResult.affected) {
+      await this.shiftService.cancelShift(id);
+    }
+    return new ResponseDto<CancelResponse>(new CancelResponse(id, !!cancelationResult.affected));
   }
 
   @Patch(':shiftId/book')
