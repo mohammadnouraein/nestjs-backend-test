@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { Repository, DeleteResult } from 'typeorm';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { Shift } from './shift.entity';
 
 @Injectable()
@@ -16,6 +16,21 @@ export class ShiftService {
         jobId: uuid,
       },
     });
+  }
+
+  async cancelShiftByJobId(jobId: string): Promise<DeleteResult> {
+    const selectedShifts = await this.repository.find({jobId});
+    if (selectedShifts.length) {
+      try {
+        return this.repository.delete({jobId});
+      } catch (e) {
+        // TODO: Log error here
+        throw new HttpException(`Could not cancel the shifts for job with job id:${jobId}`, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    } else {
+      // Uncomment below line of code if having shift in job is mandatory
+      // throw new HttpException(`Couldn't find any shift for job :${jobId}`, HttpStatus.NOT_FOUND);
+    }
   }
 
   public async bookTalent(talent: string, shiftId: string): Promise<void> {

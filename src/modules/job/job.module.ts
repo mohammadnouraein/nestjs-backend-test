@@ -4,11 +4,12 @@ import { JobService } from './job.service';
 import { ShiftModule } from '../shift/shift.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Job } from './job.entity';
+import { ShiftService } from '../shift/shift.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Job]), ShiftModule],
   controllers: [JobController],
-  providers: [JobService],
+  providers: [JobService, ShiftService],
   exports: [JobService],
 })
-export class JobModule {}
+export class JobModule { }

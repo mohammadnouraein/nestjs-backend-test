@@ -5,10 +5,11 @@ import { ResponseDto } from '../../utils/ResponseDto';
 import { ValidationPipe } from '../ValidationPipe';
 import { JobRequest } from './dto/JobRequest';
 import { JobRequestResponse } from './dto/JobRequestResponse';
+import { ShiftService } from '../shift/shift.service';
 
 @Controller('job')
 export class JobController {
-  constructor(private readonly jobService: JobService) { }
+  constructor(private readonly jobService: JobService, private readonly shiftService: ShiftService) { }
 
   @Post()
   async requestJob(
@@ -24,6 +25,9 @@ export class JobController {
     @Param('id') id: string
   ): Promise<ResponseDto<JobRequestResponse>> {
     const cancelationResult = await this.jobService.cancelJob(id);
+    if (cancelationResult.affected) {
+      await this.shiftService.cancelShiftByJobId(id);
+    }
     return new ResponseDto<JobRequestResponse>(new JobRequestResponse(cancelationResult.affected ? id : ''));
   }
 }
